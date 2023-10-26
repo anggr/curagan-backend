@@ -74,4 +74,18 @@ export class AppointmentsController {
     console.log(end);
     return this.AppointmentsService.getHistory(start, end, id);
   }
+
+
+@Post('/:id/accept')
+async acceptAppointment(@Param('id') id: string) {
+  return this.AppointmentsService.acceptAppointment(id);
 }
+
+@Post('/:id/reject')
+async rejectAppointment(@Param('id') id: string, @Body('reason') reason: string) {
+  return this.AppointmentsService.rejectAppointment(id, reason);
+}
+
+
+}
+

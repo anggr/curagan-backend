@@ -2,10 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { EventsGateway } from './events.gateway';
 
 @Injectable()
 export class AppointmentsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private eventsGateway: EventsGateway,
+  ) {}
 
   async create(createAppointmentDto: CreateAppointmentDto) {
     const { patientID, doctorID, datetime, status } = createAppointmentDto;
@@ -19,14 +23,6 @@ export class AppointmentsService {
       },
     });
   }
-
-  // async findPatientAppointments(patientID: string) {
-  //   return await this.prisma.appointmentPatientDoctor.findMany({
-  //     where: {
-  //       patientID: patientID
-  //     }
-  //   });
-  // }
 
   async findAppointments(id: string) {
     return await this.prisma.appointmentPatientDoctor.findMany({
@@ -93,5 +89,29 @@ export class AppointmentsService {
       },
     });
     return response;
+  }
+  async acceptAppointment(id: string) {
+    const result = await this.prisma.appointmentPatientDoctor.update({
+      where: { appointmentId: id },
+      data: { status: 'Accepted' },
+    });
+    this.eventsGateway.server.emit('appointmentStatus', {
+      id,
+      status: 'Accepted',
+    }); 
+    return result;
+  }
+
+  async rejectAppointment(id: string, reason: string) {
+    const result = await this.prisma.appointmentPatientDoctor.update({
+      where: { appointmentId: id },
+      data: { status: 'Rejected', rejectionReason: reason },
+    });
+    this.eventsGateway.server.emit('appointmentStatus', {
+      id,
+      status: 'Rejected',
+      reason,
+    }); 
+    return result;
   }
 }

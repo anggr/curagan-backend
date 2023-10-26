@@ -1,42 +1,50 @@
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RejectionReason {
+  FULL_BOOKED
+  NOT_ON_DUTY
+  OUT_OF_EXPERTISE
+  UNAVAILABLE
 }
 
 model Patient {
-    id          String                     @id @default(uuid())
-    email       String                     @unique
-    password    String
-    name        String
-    imageURL    String
-    appointment AppointmentPatientDoctor[]
+  id          String                     @id @default(uuid())
+  email       String                     @unique
+  password    String
+  name        String
+  imageURL    String
+  appointment AppointmentPatientDoctor[]
 }
 
 model Doctor {
-    id             String                     @id @default(uuid())
-    email          String                     @unique
-    specialization String                     @default("Umum")
-    password       String
-    name           String
-    imageURL       String
-    location       String
-    hospital       String
-    schedule       String?
-    appointment    AppointmentPatientDoctor[]
+  id             String                     @id @default(uuid())
+  email          String                     @unique
+  specialization Specialization             @default(Umum)
+  password       String
+  name           String
+  imageURL       String
+  location       String
+  hospital       String
+  schedule       String?
+  appointment    AppointmentPatientDoctor[]
 }
 
 model AppointmentPatientDoctor {
-    appointmentId String   @id @default(uuid())
-    patient       Patient? @relation(fields: [patientID], references: [id])
-    patientID     String?
-    doctor        Doctor?  @relation(fields: [doctorID], references: [id])
-    doctorID      String?
-    datetime      DateTime
-    status        Status
+  appointmentId   String         @id @default(uuid())
+  patient         Patient?       @relation(fields: [patientID], references: [id])
+  patientID       String?
+  doctor          Doctor?        @relation(fields: [doctorID], references: [id])
+  doctorID        String?
+  datetime        DateTime
+  status          Status         @default(Pending)
+  rejectionReason RejectionReason?
 }
 
 enum Specialization {
