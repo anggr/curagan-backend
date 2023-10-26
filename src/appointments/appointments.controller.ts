@@ -20,6 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { Appointment } from './entities/appointment.entity';
 import { AuthGuard, RoleGuard, Roles } from '../doctor/doctor.guard';
+import { RejectionReason } from './appointment.enums';
 
 @Controller('appointments')
 @ApiTags('appointments')
@@ -75,17 +76,17 @@ export class AppointmentsController {
     return this.AppointmentsService.getHistory(start, end, id);
   }
 
+  @Post('/:id/accept')
+  async acceptAppointment(@Param('id') id: string) {
+    return this.AppointmentsService.acceptAppointment(id);
+  }
 
-@Post('/:id/accept')
-async acceptAppointment(@Param('id') id: string) {
-  return this.AppointmentsService.acceptAppointment(id);
+  @Post('/:id/reject')
+  async rejectAppointment(
+    @Param('id') id: string,
+    @Body('reason') reason: string,
+  ) {
+    const reasonEnum = RejectionReason[reason as keyof typeof RejectionReason];
+    return this.AppointmentsService.rejectAppointment(id, reasonEnum);
+  }
 }
-
-@Post('/:id/reject')
-async rejectAppointment(@Param('id') id: string, @Body('reason') reason: string) {
-  return this.AppointmentsService.rejectAppointment(id, reason);
-}
-
-
-}
-

@@ -3,6 +3,7 @@ import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { EventsGateway } from './events.gateway';
+import { RejectionReason } from './appointment.enums';
 
 @Injectable()
 export class AppointmentsService {
@@ -98,20 +99,21 @@ export class AppointmentsService {
     this.eventsGateway.server.emit('appointmentStatus', {
       id,
       status: 'Accepted',
-    }); 
+    });
     return result;
   }
 
-  async rejectAppointment(id: string, reason: string) {
+  async rejectAppointment(id: string, reason: RejectionReason) {
+    // Ubah tipe data reason
     const result = await this.prisma.appointmentPatientDoctor.update({
       where: { appointmentId: id },
-      data: { status: 'Rejected', rejectionReason: reason },
+      data: { status: 'Rejected', rejectionReason: reason as any,},
     });
     this.eventsGateway.server.emit('appointmentStatus', {
       id,
       status: 'Rejected',
       reason,
-    }); 
+    });
     return result;
   }
 }
