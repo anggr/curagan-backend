@@ -96,24 +96,27 @@ export class AppointmentsService {
       where: { appointmentId: id },
       data: { status: 'Accepted' },
     });
-    this.eventsGateway.server.emit('appointmentStatus', {
-      id,
-      status: 'Accepted',
-    });
+    this.eventsGateway.server
+      .to(`patient-${result.patientID}`)
+      .emit('appointmentStatus', {
+        id,
+        status: 'Accepted',
+      });
     return result;
   }
 
   async rejectAppointment(id: string, reason: RejectionReason) {
-
     const result = await this.prisma.appointmentPatientDoctor.update({
       where: { appointmentId: id },
-      data: { status: 'Rejected', rejectionReason: reason as any,},
+      data: { status: 'Rejected', rejectionReason: reason as any },
     });
-    this.eventsGateway.server.emit('appointmentStatus', {
-      id,
-      status: 'Rejected',
-      reason,
-    });
+    this.eventsGateway.server
+      .to(`patient-${result.patientID}`)
+      .emit('appointmentStatus', {
+        id,
+        status: 'Rejected',
+        reason,
+      });
     return result;
   }
 }
