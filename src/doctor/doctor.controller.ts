@@ -21,6 +21,7 @@ import {
   ApiTags,
   ApiBearerAuth,
   ApiQuery,
+  ApiBody,
 } from '@nestjs/swagger';
 import { Doctor } from './entities/doctor.entity';
 import { Request } from 'express';
@@ -30,27 +31,50 @@ import { Request } from 'express';
 export class DoctorController {
   constructor(private readonly doctorService: DoctorService) {}
 
-  /// AUTH CONTROLLER
+  @ApiBody({
+    description: 'Doctor login credentials',
+    type: LoginDto,
+  })
+  @ApiCreatedResponse({
+    description: 'Doctor successfully logged in.',
+    type: Doctor,
+  })
   @Post('/auth/login')
   @ApiBearerAuth()
-  @ApiCreatedResponse({ type: Doctor })
   login(@Body() loginDto: LoginDto, @Req() req: Request) {
     return this.doctorService.login(loginDto, req);
   }
 
+  @ApiBody({
+    description: 'Create a new doctor',
+    type: CreateDoctorDto,
+  })
+  @ApiCreatedResponse({
+    description: 'Doctor successfully registered.',
+    type: Doctor,
+  })
   @Post('/auth/register')
-  @ApiCreatedResponse({ type: Doctor })
   register(@Body() registerDto: CreateDoctorDto) {
     return this.doctorService.register(registerDto);
   }
 
   // FILTER DOCTOR BY NAME, LOCATION AND HOSPITAL
+  @ApiQuery({
+    name: 'name',
+    description: 'Name of the doctor to search',
+    required: false,
+    type: String,
+  })
+  @ApiOkResponse({
+    description: 'Doctors that match the query',
+    type: Doctor,
+    isArray: true,
+  })
   @Get('/query')
   searchDoctor(@Query('name') name: string) {
     return this.doctorService.searchDoctor(name);
   }
 
-  /// BASIC CRUD
   @Get('/')
   @ApiOkResponse({ type: Doctor, isArray: true })
   @ApiQuery({
@@ -69,11 +93,18 @@ export class DoctorController {
     return this.doctorService.getDoctorById(id);
   }
 
+  @ApiBody({
+    description: 'Update doctor details',
+    type: UpdateDoctorDto,
+  })
+  @ApiOkResponse({
+    description: 'Doctor details successfully updated.',
+    type: Doctor,
+  })
   @Put('/:id')
   @UseGuards(AuthorGuard)
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ type: Doctor })
   updateDoctor(
     @Param('id') id: string,
     @Body() updateDoctorDto: UpdateDoctorDto,
