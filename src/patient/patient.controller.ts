@@ -18,6 +18,7 @@ import {
   ApiOkResponse,
   ApiTags,
   ApiBearerAuth,
+  ApiBody,
 } from '@nestjs/swagger';
 import { Patient } from './entities/patient.entity';
 import { AuthGuard, AuthorGuard } from '../doctor/doctor.guard';
@@ -28,15 +29,29 @@ import { Request } from 'express';
 export class PatientController {
   constructor(private readonly patientService: PatientService) {}
 
+  @ApiBody({
+    description: 'Register a new patient',
+    type: CreatePatientDto,
+  })
+  @ApiCreatedResponse({
+    description: 'Patient successfully registered.',
+    type: Patient,
+  })
   @Post('/auth/register')
-  @ApiCreatedResponse({ type: Patient })
   register(@Body() registerDto: CreatePatientDto) {
     return this.patientService.register(registerDto);
   }
 
+  @ApiBody({
+    description: 'Patient login credentials',
+    type: LoginPatient,
+  })
+  @ApiCreatedResponse({
+    description: 'Patient successfully logged in.',
+    type: Patient,
+  })
   @Post('/auth/login')
   @ApiBearerAuth()
-  @ApiCreatedResponse({ type: Patient })
   login(@Body() loginDto: LoginPatient) {
     return this.patientService.login(loginDto);
   }
@@ -57,11 +72,18 @@ export class PatientController {
     return this.patientService.getPatientById(id);
   }
 
+  @ApiBody({
+    description: 'Update patient details',
+    type: UpdatePatientDto,
+  })
+  @ApiOkResponse({
+    description: 'Patient details successfully updated.',
+    type: Patient,
+  })
   @Put('/:id')
   @UseGuards(AuthorGuard)
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
-  @ApiOkResponse({ type: Patient })
   updatePatient(
     @Param('id') id: string,
     @Body() updatePatientDto: UpdatePatientDto,
