@@ -105,11 +105,12 @@ export class AppointmentsService {
     return result;
   }
 
-  async rejectAppointment(id: string, reason: RejectionReason) {
+  async rejectAppointment(id: string, reason: string) {
     const result = await this.prisma.appointmentPatientDoctor.update({
       where: { appointmentId: id },
       data: { status: 'Rejected', rejectionReason: reason as any },
     });
+    console.log(result.patientID);
     this.eventsGateway.server
       .to(`patient-${result.patientID}`)
       .emit('appointmentStatus', {

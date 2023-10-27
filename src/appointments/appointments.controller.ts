@@ -125,9 +125,20 @@ export class AppointmentsController {
   @UseGuards(AuthGuard)
   async rejectAppointment(
     @Param('id') id: string,
-    @Body('reason') reason: string,
+    @Body('rejectionReason') reason: string,
   ) {
-    const reasonEnum = RejectionReason[reason as keyof typeof RejectionReason];
-    return this.AppointmentsService.rejectAppointment(id, reasonEnum);
+    console.log('Received reason:', reason);
+  
+    const reasonEnumKey = Object.keys(RejectionReason).find(
+      (key) => RejectionReason[key as any] === reason
+    );
+  
+  
+    const prismaEnumFormat = reasonEnumKey?.replace(/\s+/g, '_').toUpperCase();
+  
+    console.log('Converted to Prisma enum format:', prismaEnumFormat);
+  
+    return this.AppointmentsService.rejectAppointment(id, prismaEnumFormat);
   }
+  
 }

@@ -7,7 +7,7 @@ async function bootstrap() {
   app.enableCors();
 
   const config = new DocumentBuilder()
-    .setTitle('Curagan API')
+    .setTitle('Curagan API 2')
     .setDescription('Curagan API (okky)')
     .addBearerAuth()
     .build();
