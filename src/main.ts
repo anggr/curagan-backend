@@ -8,7 +8,7 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
   .setTitle('Curagan API')
-  .setDescription('Curagan API')
+  .setDescription('Curagan API (okky)')
   .addBearerAuth()
   .build();
 
