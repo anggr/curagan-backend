@@ -17,6 +17,7 @@ import {
   ApiOkResponse,
   ApiTags,
   ApiBearerAuth,
+  ApiBody,
 } from '@nestjs/swagger';
 import { Appointment } from './entities/appointment.entity';
 import { AuthGuard, RoleGuard, Roles } from '../doctor/doctor.guard';
@@ -27,33 +28,47 @@ import { RejectionReason } from './appointment.enums';
 export class AppointmentsController {
   constructor(private readonly AppointmentsService: AppointmentsService) {}
 
+  @ApiBody({ type: CreateAppointmentDto })
+  @ApiCreatedResponse({
+    description: 'Appointment successfully created.',
+    type: Appointment,
+  })
   @Post()
   @ApiBearerAuth()
-  @ApiCreatedResponse({ type: Appointment })
   @UseGuards(AuthGuard)
   create(@Body() CreateAppointmentDto: CreateAppointmentDto) {
     return this.AppointmentsService.create(CreateAppointmentDto);
   }
 
+  @ApiOkResponse({
+    description: 'List of appointments for a given ID',
+    type: [Appointment],
+  })
   @Get('/my-appointments/:id')
   @ApiBearerAuth()
-  @ApiOkResponse({ type: Appointment, isArray: true })
   @UseGuards(AuthGuard)
   findAppointments(@Param('id') id: string) {
     return this.AppointmentsService.findAppointments(id);
   }
 
+  @ApiOkResponse({
+    description: 'Detail of an appointment',
+    type: Appointment,
+  })
   @Get(':id')
   @ApiBearerAuth()
-  @ApiOkResponse({ type: Appointment })
   @UseGuards(AuthGuard)
   findOne(@Param('id') id: string) {
     return this.AppointmentsService.findOne(id);
   }
 
+  @ApiBody({ type: UpdateAppointmentDto })
+  @ApiOkResponse({
+    description: 'Appointment successfully updated.',
+    type: Appointment,
+  })
   @Patch(':id')
   @ApiBearerAuth()
-  @ApiOkResponse({ type: Appointment })
   @UseGuards(RoleGuard)
   @Roles('doctor')
   @UseGuards(AuthGuard)
@@ -64,6 +79,10 @@ export class AppointmentsController {
     return this.AppointmentsService.update(id, updateAppointmentDto);
   }
 
+  @ApiOkResponse({
+    description: 'List of appointments within a date range',
+    type: [Appointment],
+  })
   @Get('/history/:doctorId/')
   @UseGuards(AuthGuard)
   getHistory(
@@ -71,17 +90,39 @@ export class AppointmentsController {
     @Query('end') end: string,
     @Param('doctorId') id: string,
   ) {
-    console.log(start);
-    console.log(end);
     return this.AppointmentsService.getHistory(start, end, id);
   }
 
+  @ApiOkResponse({
+    description: 'Appointment successfully accepted.',
+    type: Appointment,
+  })
   @Post('/:id/accept')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   async acceptAppointment(@Param('id') id: string) {
     return this.AppointmentsService.acceptAppointment(id);
   }
 
+  @ApiBody({
+    description: 'Reason for rejecting an appointment',
+    schema: {
+      type: 'object',
+      properties: {
+        reason: {
+          type: 'string',
+          enum: Object.values(RejectionReason),
+        },
+      },
+    },
+  })
+  @ApiOkResponse({
+    description: 'Appointment successfully rejected.',
+    type: Appointment,
+  })
   @Post('/:id/reject')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
   async rejectAppointment(
     @Param('id') id: string,
     @Body('reason') reason: string,

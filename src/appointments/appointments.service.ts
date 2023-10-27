@@ -104,7 +104,7 @@ export class AppointmentsService {
   }
 
   async rejectAppointment(id: string, reason: RejectionReason) {
-    // Ubah tipe data reason
+
     const result = await this.prisma.appointmentPatientDoctor.update({
       where: { appointmentId: id },
       data: { status: 'Rejected', rejectionReason: reason as any,},

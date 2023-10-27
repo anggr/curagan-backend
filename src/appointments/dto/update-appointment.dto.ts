@@ -1,9 +1,15 @@
-import { PartialType } from '@nestjs/swagger';
-import { IsEnum } from 'class-validator'; 
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEnum } from 'class-validator';
+import { PartialType } from '@nestjs/mapped-types';
 import { CreateAppointmentDto } from './create-appointment.dto';
-import { RejectionReason } from '../appointment.enums'; 
+import { RejectionReason } from '../appointment.enums';
 
 export class UpdateAppointmentDto extends PartialType(CreateAppointmentDto) {
-  @IsEnum(RejectionReason, { each: true })
+  @ApiProperty({
+    description: 'Reason for rejecting the appointment',
+    enum: RejectionReason,
+    required: false,
+  })
+  @IsEnum(RejectionReason)
   rejectionReason?: RejectionReason;
 }
