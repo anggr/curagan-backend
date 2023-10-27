@@ -19,7 +19,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   handleDisconnect(client: Socket) {
-    // Hapus klien dari room (jika perlu)
+   
     console.log(`Client disconnected: ${client.id}`);
   }
 }

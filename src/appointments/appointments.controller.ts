@@ -127,18 +127,24 @@ export class AppointmentsController {
     @Param('id') id: string,
     @Body('rejectionReason') reason: string,
   ) {
+
     console.log('Received reason:', reason);
-  
-    const reasonEnumKey = Object.keys(RejectionReason).find(
-      (key) => RejectionReason[key as any] === reason
-    );
-  
-  
-    const prismaEnumFormat = reasonEnumKey?.replace(/\s+/g, '_').toUpperCase();
-  
-    console.log('Converted to Prisma enum format:', prismaEnumFormat);
-  
-    return this.AppointmentsService.rejectAppointment(id, prismaEnumFormat);
+    console.log('Appointment ID:', id);
+
+
+    const upperReason = reason.replace(/ /g, '_').toUpperCase();
+
+
+    console.log('Converted to upper:', upperReason);
+
+
+    const existingAppointment = await this.AppointmentsService.findOne(id);
+    if (!existingAppointment) {
+      console.log('Appointment record not found');
+
+      return;
+    }
+
+    return this.AppointmentsService.rejectAppointment(id, upperReason);
   }
-  
 }
